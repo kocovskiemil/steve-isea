@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,13 +20,13 @@ package de.rwth.idsg.steve.service;
 
 import com.google.common.base.Strings;
 import de.rwth.idsg.steve.SteveException;
-import de.rwth.idsg.steve.config.DelegatingTaskExecutor;
 import de.rwth.idsg.steve.repository.SettingsRepository;
 import de.rwth.idsg.steve.repository.dto.MailSettings;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -35,8 +35,11 @@ import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Sevket Goekay <sevketgokay@gmail.com>
@@ -47,10 +50,33 @@ import java.util.Properties;
 public class MailService {
 
     @Autowired private SettingsRepository settingsRepository;
-    @Autowired private DelegatingTaskExecutor asyncTaskExecutor;
+    @Autowired private ScheduledExecutorService executorService;
+
+    private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private final Lock readLock = readWriteLock.readLock();
+    private final Lock writeLock = readWriteLock.writeLock();
+
+    private MailSettings settings;
+    private Session session;
+
+    @PostConstruct
+    public void loadSettingsFromDB() {
+        writeLock.lock();
+        try {
+            settings = settingsRepository.getMailSettings();
+        } finally {
+            writeLock.unlock();
+        }
+        session = createSession(getSettings());
+    }
 
     public MailSettings getSettings() {
-        return settingsRepository.getMailSettings();
+        readLock.lock();
+        try {
+            return this.settings;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public void sendTestMail() {
@@ -62,7 +88,7 @@ public class MailService {
     }
 
     public void sendAsync(String subject, String body) {
-        asyncTaskExecutor.execute(() -> {
+        executorService.execute(() -> {
             try {
                 send(subject, body);
             } catch (MessagingException e) {
@@ -73,7 +99,6 @@ public class MailService {
 
     public void send(String subject, String body) throws MessagingException {
         MailSettings settings = getSettings();
-        Session session = createSession(getSettings());
 
         Message mail = new MimeMessage(session);
         mail.setSubject("[SteVe] " + subject);

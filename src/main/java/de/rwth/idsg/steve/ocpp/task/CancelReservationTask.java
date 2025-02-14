@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,12 +20,13 @@ package de.rwth.idsg.steve.ocpp.task;
 
 import de.rwth.idsg.steve.ocpp.Ocpp15AndAboveTask;
 import de.rwth.idsg.steve.ocpp.OcppCallback;
+import de.rwth.idsg.steve.ocpp.OcppVersion;
 import de.rwth.idsg.steve.repository.ReservationRepository;
 import de.rwth.idsg.steve.web.dto.ocpp.CancelReservationParams;
 import ocpp.cp._2012._06.CancelReservationRequest;
 import ocpp.cp._2012._06.CancelReservationResponse;
 
-import jakarta.xml.ws.AsyncHandler;
+import javax.xml.ws.AsyncHandler;
 
 /**
  * @author Sevket Goekay <sevketgokay@gmail.com>
@@ -35,9 +36,9 @@ public class CancelReservationTask extends Ocpp15AndAboveTask<CancelReservationP
 
     private final ReservationRepository reservationRepository;
 
-    public CancelReservationTask(CancelReservationParams params,
+    public CancelReservationTask(OcppVersion ocppVersion, CancelReservationParams params,
                                  ReservationRepository reservationRepository) {
-        super(params);
+        super(ocppVersion, params);
         this.reservationRepository = reservationRepository;
     }
 

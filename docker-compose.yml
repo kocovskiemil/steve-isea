@@ -15,7 +15,7 @@ services:
     image: mariadb:10.4.30
     restart: unless-stopped
     ports:
-      - 3306:3306
+      - "3306:3306"
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: stevedb

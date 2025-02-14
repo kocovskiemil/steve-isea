@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,33 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.rwth.idsg.steve.config;
+package de.rwth.idsg.steve.ocpp;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import java.io.Closeable;
-import java.io.IOException;
+import de.rwth.idsg.steve.ocpp.task.ClearChargingProfileTask;
+import de.rwth.idsg.steve.ocpp.task.GetCompositeScheduleTask;
+import de.rwth.idsg.steve.ocpp.task.SetChargingProfileTask;
+import de.rwth.idsg.steve.ocpp.task.TriggerMessageTask;
+import de.rwth.idsg.steve.repository.dto.ChargePointSelect;
 
 /**
  * @author Sevket Goekay <sevketgokay@gmail.com>
- * @since 02.02.2025
+ * @since 13.03.2018
  */
-@Slf4j
-@RequiredArgsConstructor
-public class DelegatingTaskExecutor implements Closeable {
+public interface ChargePointService16_Invoker extends ChargePointService15_Invoker {
 
-    private final ThreadPoolTaskExecutor delegate;
+    void clearChargingProfile(ChargePointSelect cp, ClearChargingProfileTask task);
 
-    @Override
-    public void close() throws IOException {
-        log.info("Shutting down");
-        delegate.shutdown();
-    }
+    void setChargingProfile(ChargePointSelect cp, SetChargingProfileTask task);
 
-    public void execute(Runnable task) {
-        delegate.execute(task);
-    }
+    void getCompositeSchedule(ChargePointSelect cp, GetCompositeScheduleTask task);
+
+    void triggerMessage(ChargePointSelect cp, TriggerMessageTask task);
 
 }

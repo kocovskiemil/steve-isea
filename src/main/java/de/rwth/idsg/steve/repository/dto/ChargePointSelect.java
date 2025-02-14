@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,8 @@
  */
 package de.rwth.idsg.steve.repository.dto;
 
-import de.rwth.idsg.steve.ocpp.OcppProtocol;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rwth.idsg.steve.ocpp.OcppTransport;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -27,24 +28,33 @@ import lombok.RequiredArgsConstructor;
  * @author Sevket Goekay <sevketgokay@gmail.com>
  * @since 29.12.2014
  */
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Getter
 public final class ChargePointSelect {
-    private final OcppProtocol ocppProtocol;
+    private final OcppTransport ocppTransport;
     private final String chargeBoxId;
     private final String endpointAddress;
 
-    public ChargePointSelect(OcppProtocol ocppProtocol, String chargeBoxId) {
+    public ChargePointSelect(OcppTransport ocppTransport, String chargeBoxId) {
         // Provide a non-null value (or placeholder if you will) to frontend for JSON charge points.
         // This is clearly a hack. Not my proudest moment.
-        this(ocppProtocol, chargeBoxId, "-");
+        this(ocppTransport, chargeBoxId, "-");
     }
 
+    @JsonCreator
+    public ChargePointSelect(
+            @JsonProperty("ocppTransport") OcppTransport ocppTransport,
+            @JsonProperty("chargeBoxId") String chargeBoxId,
+            @JsonProperty("endpointAddress") String endpointAddress) {
+        this.ocppTransport = ocppTransport;
+        this.chargeBoxId = chargeBoxId;
+        this.endpointAddress = endpointAddress;
+    }
     public boolean isEndpointAddressSet() {
         return !("-".equals(endpointAddress));
     }
 
     public boolean isSoap() {
-        return OcppTransport.SOAP == ocppProtocol.getTransport();
+        return OcppTransport.SOAP == ocppTransport;
     }
 }

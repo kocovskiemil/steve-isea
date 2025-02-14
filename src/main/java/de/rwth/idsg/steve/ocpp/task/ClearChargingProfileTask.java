@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,13 +20,14 @@ package de.rwth.idsg.steve.ocpp.task;
 
 import de.rwth.idsg.steve.ocpp.Ocpp16AndAboveTask;
 import de.rwth.idsg.steve.ocpp.OcppCallback;
+import de.rwth.idsg.steve.ocpp.OcppVersion;
 import de.rwth.idsg.steve.repository.ChargingProfileRepository;
 import de.rwth.idsg.steve.web.dto.ocpp.ClearChargingProfileFilterType;
 import de.rwth.idsg.steve.web.dto.ocpp.ClearChargingProfileParams;
 import lombok.extern.slf4j.Slf4j;
 import ocpp.cp._2015._10.ClearChargingProfileRequest;
 
-import jakarta.xml.ws.AsyncHandler;
+import javax.xml.ws.AsyncHandler;
 
 /**
  * @author Sevket Goekay <sevketgokay@gmail.com>
@@ -37,9 +38,10 @@ public class ClearChargingProfileTask extends Ocpp16AndAboveTask<ClearChargingPr
 
     private final ChargingProfileRepository chargingProfileRepository;
 
-    public ClearChargingProfileTask(ClearChargingProfileParams params,
+    public ClearChargingProfileTask(OcppVersion ocppVersion,
+                                    ClearChargingProfileParams params,
                                     ChargingProfileRepository chargingProfileRepository) {
-        super(params);
+        super(ocppVersion, params);
         this.chargingProfileRepository = chargingProfileRepository;
     }
 

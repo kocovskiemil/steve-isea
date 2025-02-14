@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,13 +18,13 @@
  */
 package de.rwth.idsg.steve.web.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import jakarta.validation.constraints.AssertTrue;
+import javax.validation.constraints.AssertTrue;
 import java.util.Objects;
 
 /**
@@ -37,25 +37,25 @@ import java.util.Objects;
 public class TransactionQueryForm extends QueryForm {
 
     // Internal database Id
-    @Schema(description = "Database primary key of the transaction")
+    @ApiModelProperty(value = "Database primary key of the transaction")
     private Integer transactionPk;
 
-    @Schema(description = "Disabled for the Web APIs. Do not use and set", hidden = true)
+    @ApiModelProperty(value = "Disabled for the Web APIs. Do not use and set", hidden = true)
     private boolean returnCSV = false;
 
-    @Schema(description = "Return active or all transactions? Defaults to ALL")
+    @ApiModelProperty(value = "Return active or all transactions? Defaults to ALL")
     private QueryType type = QueryType.ACTIVE;
 
-    @Schema(description = "Return the time period of the transactions. If FROM_TO, 'from' and 'to' must be set. Additionally, 'to' must be after 'from'. Defaults to ALL")
+    @ApiModelProperty(value = "Return the time period of the transactions. If FROM_TO, 'from' and 'to' must be set. Additionally, 'to' must be after 'from'. Defaults to ALL")
     private QueryPeriodType periodType = QueryPeriodType.ALL;
 
-    @Schema(hidden = true)
+    @ApiModelProperty(hidden = true)
     @AssertTrue(message = "The values 'From' and 'To' must be both set")
     public boolean isPeriodFromToCorrect() {
         return periodType != QueryPeriodType.FROM_TO || isFromToSet();
     }
 
-    @Schema(hidden = true)
+    @ApiModelProperty(hidden = true)
     public boolean isTransactionPkSet() {
         return transactionPk != null;
     }
@@ -119,9 +119,9 @@ public class TransactionQueryForm extends QueryForm {
     }
 
     @ToString(callSuper = true)
-    public static class TransactionQueryFormForApi extends TransactionQueryForm {
+    public static class ForApi extends TransactionQueryForm {
 
-        public TransactionQueryFormForApi() {
+        public ForApi() {
             super();
             setType(QueryType.ALL);
             setPeriodType(QueryPeriodType.ALL);

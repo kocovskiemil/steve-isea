@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,7 @@ import static de.rwth.idsg.steve.utils.OcppTagActivityRecordUtils.isBlocked;
 import static de.rwth.idsg.steve.utils.OcppTagActivityRecordUtils.isExpired;
 
 import com.google.common.base.Strings;
+import de.rwth.idsg.steve.SteveException;
 import de.rwth.idsg.steve.repository.OcppTagRepository;
 import de.rwth.idsg.steve.repository.dto.OcppTag;
 import de.rwth.idsg.steve.service.dto.UnidentifiedIncomingObject;
@@ -55,7 +56,7 @@ public class OcppTagService {
     private final OcppTagRepository ocppTagRepository;
     private final AuthTagService authTagService;
 
-    public List<OcppTag.OcppTagOverview> getOverview(OcppTagQueryForm form) {
+    public List<OcppTag.Overview> getOverview(OcppTagQueryForm form) {
         return ocppTagRepository.getOverview(form);
     }
 

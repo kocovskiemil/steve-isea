@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -46,9 +46,9 @@ public class Application implements ApplicationStarter, AutoCloseable {
 
         switch (sc.getProfile()) {
             case DEV:
-            case TEST:
                 delegate = new SteveDevStarter();
                 break;
+            case TEST:
             case PROD:
                 delegate = new SteveProdStarter();
                 break;

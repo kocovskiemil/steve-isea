@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,13 +18,14 @@
  */
 package de.rwth.idsg.steve.web.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.AssertTrue;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.joda.time.LocalDateTime;
+
+import javax.validation.constraints.AssertTrue;
 
 /**
  * @author Sevket Goekay <sevketgokay@gmail.com>
@@ -36,35 +37,35 @@ import org.joda.time.LocalDateTime;
 @ToString
 public abstract class QueryForm {
 
-    @Schema(description = "The identifier of the chargebox (i.e. charging station)")
+    @ApiModelProperty(value = "The identifier of the chargebox (i.e. charging station)")
     private String chargeBoxId;
 
-    @Schema(description = "The OCPP tag")
+    @ApiModelProperty(value = "The OCPP tag")
     private String ocppIdTag;
 
-    @Schema(description = "Show results that happened after this date/time. Format: ISO8601 without timezone. Example: `2022-10-10T09:00:00`")
+    @ApiModelProperty(value = "Show results that happened after this date/time. Format: ISO8601 without timezone. Example: `2022-10-10T09:00:00`")
     private LocalDateTime from;
 
-    @Schema(description = "Show results that happened before this date/time. Format: ISO8601 without timezone. Example: `2022-10-10T12:00:00`")
+    @ApiModelProperty(value = "Show results that happened before this date/time. Format: ISO8601 without timezone. Example: `2022-10-10T12:00:00`")
     private LocalDateTime to;
 
-    @Schema(hidden = true)
+    @ApiModelProperty(hidden = true)
     @AssertTrue(message = "'To' must be after 'From'")
     public boolean isFromToValid() {
         return !isFromToSet() || to.isAfter(from);
     }
 
-    @Schema(hidden = true)
+    @ApiModelProperty(hidden = true)
     boolean isFromToSet() {
         return from != null && to != null;
     }
 
-    @Schema(hidden = true)
+    @ApiModelProperty(hidden = true)
     public boolean isChargeBoxIdSet() {
         return chargeBoxId != null;
     }
 
-    @Schema(hidden = true)
+    @ApiModelProperty(hidden = true)
     public boolean isOcppIdTagSet() {
         return ocppIdTag != null;
     }

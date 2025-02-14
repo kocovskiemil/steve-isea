@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -42,5 +42,13 @@ public class ChargingProfileQueryForm {
     private RecurrencyKindType recurrencyKind;
     private LocalDateTime validFrom;
     private LocalDateTime validTo;
+
+    @ToString(callSuper = true)
+    public static class ForApi extends ChargingProfileQueryForm {
+
+        public ForApi () {
+            super();
+        }
+    }
 
 }

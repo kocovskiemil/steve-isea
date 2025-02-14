@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@ package de.rwth.idsg.steve.ocpp.task;
 
 import de.rwth.idsg.steve.ocpp.Ocpp16AndAboveTask;
 import de.rwth.idsg.steve.ocpp.OcppCallback;
+import de.rwth.idsg.steve.ocpp.OcppVersion;
 import de.rwth.idsg.steve.repository.ChargingProfileRepository;
 import de.rwth.idsg.steve.service.dto.EnhancedSetChargingProfileParams;
 import jooq.steve.db.tables.records.ChargingProfileRecord;
@@ -32,8 +33,7 @@ import ocpp.cp._2015._10.ChargingSchedulePeriod;
 import ocpp.cp._2015._10.RecurrencyKindType;
 import ocpp.cp._2015._10.SetChargingProfileRequest;
 
-import jakarta.xml.ws.AsyncHandler;
-
+import javax.xml.ws.AsyncHandler;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,9 +45,10 @@ public class SetChargingProfileTask extends Ocpp16AndAboveTask<EnhancedSetChargi
 
     private final ChargingProfileRepository chargingProfileRepository;
 
-    public SetChargingProfileTask(EnhancedSetChargingProfileParams params,
+    public SetChargingProfileTask(OcppVersion ocppVersion,
+                                  EnhancedSetChargingProfileParams params,
                                   ChargingProfileRepository chargingProfileRepository) {
-        super(params);
+        super(ocppVersion, params);
         this.chargingProfileRepository = chargingProfileRepository;
     }
 

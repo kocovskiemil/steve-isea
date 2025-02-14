@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,9 @@
  */
 package de.rwth.idsg.steve.repository.dto;
 
-import lombok.Builder;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 import org.joda.time.DateTime;
 
 /**
@@ -27,9 +28,29 @@ import org.joda.time.DateTime;
  * @since 21.03.2016
  */
 @Getter
+@Setter
+@ToString
 @Builder
+//@AllArgsConstructor
 public class InsertReservationParams {
-    private final String idTag, chargeBoxId;
+    private final String idTag;
+    private final String chargeBoxId;
     private final int connectorId;
-    private final DateTime startTimestamp, expiryTimestamp;
+    private final DateTime startTimestamp;
+    private final DateTime expiryTimestamp;
+
+    @JsonCreator
+    public InsertReservationParams(
+            @JsonProperty("idTag") String idTag,
+            @JsonProperty("chargeBoxId") String chargeBoxId,
+            @JsonProperty("connectorId") int connectorId,
+            @JsonProperty("startTimestamp") DateTime startTimestamp,
+            @JsonProperty("expiryTimestamp") DateTime expiryTimestamp
+    ) {
+        this.idTag = idTag;
+        this.chargeBoxId = chargeBoxId;
+        this.connectorId = connectorId;
+        this.startTimestamp = startTimestamp;
+        this.expiryTimestamp = expiryTimestamp;
+    }
 }

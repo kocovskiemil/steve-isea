@@ -1,6 +1,6 @@
 /*
  * SteVe - SteckdosenVerwaltung - https://github.com/steve-community/steve
- * Copyright (C) 2013-2025 SteVe Community Team
+ * Copyright (C) 2013-2024 SteVe Community Team
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,7 @@
  */
 package de.rwth.idsg.steve.web.dto;
 
-import com.google.common.base.Strings;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -36,45 +35,37 @@ import java.util.Objects;
 @ToString
 public class OcppTagQueryForm {
 
-    @Schema(description = "Database primary key of the OCPP tag")
+    @ApiModelProperty(value = "Database primary key of the OCPP tag")
     private Integer ocppTagPk;
 
-    @Schema(description = "The OCPP tag")
+    @ApiModelProperty(value = "The OCPP tag")
     private String idTag;
 
-    @Schema(description = "The parent OCPP tag of this OCPP tag")
+    @ApiModelProperty(value = "The parent OCPP tag of this OCPP tag")
     private String parentIdTag;
 
-    @Schema(description = "Return expired, not expired, or all Ocpp tags? Defaults to ALL")
+    @ApiModelProperty(value = "Return expired, not expired, or all Ocpp tags? Defaults to ALL")
     private BooleanType expired = BooleanType.FALSE;
 
-    @Schema(description = "Return in-transaction, not in-transaction, or all Ocpp tags? Defaults to ALL")
+    @ApiModelProperty(value = "Return in-transaction, not in-transaction, or all Ocpp tags? Defaults to ALL")
     private BooleanType inTransaction = BooleanType.ALL;
 
-    @Schema(description = "Return blocked, not blocked, or all Ocpp tags? Defaults to ALL")
+    @ApiModelProperty(value = "Return blocked, not blocked, or all Ocpp tags? Defaults to ALL")
     private BooleanType blocked = BooleanType.FALSE;
 
-    @Schema(description = "Query by the note associated with the OCPP tag. The value of this field does not have to exactly match the note. A substring is also accepted.")
-    private String note;
-
-    @Schema(hidden = true)
+    @ApiModelProperty(hidden = true)
     public boolean isOcppTagPkSet() {
         return ocppTagPk != null;
     }
 
-    @Schema(hidden = true)
+    @ApiModelProperty(hidden = true)
     public boolean isIdTagSet() {
         return idTag != null;
     }
 
-    @Schema(hidden = true)
+    @ApiModelProperty(hidden = true)
     public boolean isParentIdTagSet() {
         return parentIdTag != null;
-    }
-
-    @Schema(hidden = true)
-    public boolean isNoteSet() {
-        return !Strings.isNullOrEmpty(note);
     }
 
     public BooleanType getExpired() {
@@ -116,9 +107,9 @@ public class OcppTagQueryForm {
     }
 
     @ToString(callSuper = true)
-    public static class OcppTagQueryFormForApi extends OcppTagQueryForm {
+    public static class ForApi extends OcppTagQueryForm {
 
-        public OcppTagQueryFormForApi() {
+        public ForApi () {
             super();
             setExpired(BooleanType.ALL);
             setInTransaction(BooleanType.ALL);
