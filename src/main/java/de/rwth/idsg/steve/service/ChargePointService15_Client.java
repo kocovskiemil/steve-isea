@@ -122,6 +122,11 @@ public class ChargePointService15_Client extends ChargePointService12_Client {
     // Single Execution - since OCPP 1.5
     // -------------------------------------------------------------------------
 
+    // Thread Local for returning Reservation ID to API
+    public static final ThreadLocal<Boolean> returnReservationId = ThreadLocal.withInitial(()->false);
+    public static void enableReturnReservationId() {
+        returnReservationId.set(true);
+    }
     public int reserveNow(ReserveNowParams params) {
         List<ChargePointSelect> list = params.getChargePointSelectList();
         InsertReservationParams res = InsertReservationParams.builder()
@@ -141,8 +146,13 @@ public class ChargePointService15_Client extends ChargePointService12_Client {
         BackgroundService.with(executorService)
                          .forFirst(task.getParams().getChargePointSelectList())
                          .execute(c -> getOcpp15Invoker().reserveNow(c, task));
-
+        if (returnReservationId.get()){
+            returnReservationId.remove();
+            taskStore.add(task);
+            return reservationId;
+        } else {
         return taskStore.add(task);
+        }
     }
 
     public int cancelReservation(CancelReservationParams params) {

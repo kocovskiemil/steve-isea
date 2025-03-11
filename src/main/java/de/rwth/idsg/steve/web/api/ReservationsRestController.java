@@ -4,10 +4,10 @@ import de.rwth.idsg.steve.SteveException;
 import de.rwth.idsg.steve.repository.dto.ChargePointSelect;
 import de.rwth.idsg.steve.repository.dto.InsertReservationParams;
 import de.rwth.idsg.steve.repository.dto.Reservation;
+import de.rwth.idsg.steve.service.ChargePointService15_Client;
 import de.rwth.idsg.steve.service.ChargePointService16_Client;
 import de.rwth.idsg.steve.service.ReservationService;
 import de.rwth.idsg.steve.web.api.exception.BadRequestException;
-import de.rwth.idsg.steve.web.controller.Ocpp15Controller;
 import de.rwth.idsg.steve.web.dto.ReservationQueryForm;
 import de.rwth.idsg.steve.web.dto.ocpp.CancelReservationParams;
 import de.rwth.idsg.steve.web.dto.ocpp.ReserveNowParams;
@@ -34,6 +34,7 @@ public class ReservationsRestController {
 
     private final ReservationService reservationService;
     private final ChargePointService16_Client v16Client;
+
 
     // -------------------------------------------------------------------------
     // OCPP operations
@@ -91,9 +92,8 @@ public class ReservationsRestController {
     @ResponseStatus(HttpStatus.CREATED)
     public int create(@RequestBody @Valid ReserveNowParams params) {
         log.debug("Create request: {}", params);
-        // @Setter, @ToString added to InsertReservationParams
 
-        //int response = reservationService.insertReservation(params);
+        ChargePointService16_Client.enableReturnReservationId();
         int response = v16Client.reserveNow(params);
 
         log.debug("Create response: {}", response);
