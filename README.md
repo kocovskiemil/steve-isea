@@ -3,6 +3,10 @@
 [![build and run tests](https://github.com/steve-community/steve/actions/workflows/main.yml/badge.svg)](https://github.com/steve-community/steve/actions/workflows/main.yml)
 
 
+### Notes for running on server (**ISEA**)
+To avoid possible errors during build, please run these commands:
+1. ```chmod +x ./mvnw```
+2. ```sed -i 's/\r$//' mvnw```
 # Introduction
 
 SteVe started its life at the RWTH Aachen University [in 2013](https://github.com/steve-community/steve/issues/827). 
