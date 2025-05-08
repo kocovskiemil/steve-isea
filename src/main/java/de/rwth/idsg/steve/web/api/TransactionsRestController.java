@@ -49,7 +49,6 @@ import java.util.List;
 public class TransactionsRestController {
 
     private final TransactionRepository transactionRepository;
-    private final ChargePointService16_Client v16Client;
 
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK"),
@@ -71,46 +70,4 @@ public class TransactionsRestController {
         return response;
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 400, message = "Bad Request", response = ApiControllerAdvice.ApiErrorResponse.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ApiControllerAdvice.ApiErrorResponse.class),
-            @ApiResponse(code = 422, message = "Unprocessable Entity", response = ApiControllerAdvice.ApiErrorResponse.class),
-            @ApiResponse(code = 404, message = "Not Found", response = ApiControllerAdvice.ApiErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ApiControllerAdvice.ApiErrorResponse.class)}
-    )
-    @PostMapping(value = "/start")
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CREATED)
-    public int start(@RequestBody @Valid RemoteStartTransactionParams params) {
-        log.debug("Create request: {}", params);
-
-        int response = v16Client.remoteStartTransaction(params);
-
-        log.debug("Create response: {}", response);
-        log.debug("SENT PAYLOAD: {}", params);
-        return response;
-    }
-
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 400, message = "Bad Request", response = ApiControllerAdvice.ApiErrorResponse.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ApiControllerAdvice.ApiErrorResponse.class),
-            @ApiResponse(code = 422, message = "Unprocessable Entity", response = ApiControllerAdvice.ApiErrorResponse.class),
-            @ApiResponse(code = 404, message = "Not Found", response = ApiControllerAdvice.ApiErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ApiControllerAdvice.ApiErrorResponse.class)}
-    )
-    @PostMapping(value = "/stop")
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CREATED)
-    public int stop(@RequestBody @Valid RemoteStopTransactionParams params) {
-        //params: Integer transactionId
-        log.debug("Create request: {}", params);
-
-        int response = v16Client.remoteStopTransaction(params);
-
-        log.debug("Create response: {}", response);
-        log.debug("SENT PAYLOAD: {}", params);
-        return response;
-    }
 }
