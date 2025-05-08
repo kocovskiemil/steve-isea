@@ -23,15 +23,17 @@ import de.rwth.idsg.steve.repository.dto.Transaction;
 import de.rwth.idsg.steve.web.api.ApiControllerAdvice.ApiErrorResponse;
 import de.rwth.idsg.steve.web.api.exception.BadRequestException;
 import de.rwth.idsg.steve.web.dto.TransactionQueryForm;
+import de.rwth.idsg.steve.web.dto.ocpp.RemoteStartTransactionParams;
+import de.rwth.idsg.steve.web.dto.ocpp.RemoteStopTransactionParams;
+import de.rwth.idsg.steve.web.dto.ocpp.ReserveNowParams;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import de.rwth.idsg.steve.service.ChargePointService16_Client;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -47,6 +49,7 @@ import java.util.List;
 public class TransactionsRestController {
 
     private final TransactionRepository transactionRepository;
+    private final ChargePointService16_Client v16Client;
 
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK"),
@@ -65,6 +68,49 @@ public class TransactionsRestController {
 
         var response = transactionRepository.getTransactions(params);
         log.debug("Read response for query: {}", response);
+        return response;
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 400, message = "Bad Request", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 422, message = "Unprocessable Entity", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 404, message = "Not Found", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ApiControllerAdvice.ApiErrorResponse.class)}
+    )
+    @PostMapping(value = "/start")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CREATED)
+    public int start(@RequestBody @Valid RemoteStartTransactionParams params) {
+        log.debug("Create request: {}", params);
+
+        int response = v16Client.remoteStartTransaction(params);
+
+        log.debug("Create response: {}", response);
+        log.debug("SENT PAYLOAD: {}", params);
+        return response;
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 400, message = "Bad Request", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 422, message = "Unprocessable Entity", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 404, message = "Not Found", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ApiControllerAdvice.ApiErrorResponse.class)}
+    )
+    @PostMapping(value = "/stop")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CREATED)
+    public int stop(@RequestBody @Valid RemoteStopTransactionParams params) {
+        //params: Integer transactionId
+        log.debug("Create request: {}", params);
+
+        int response = v16Client.remoteStopTransaction(params);
+
+        log.debug("Create response: {}", response);
+        log.debug("SENT PAYLOAD: {}", params);
         return response;
     }
 }

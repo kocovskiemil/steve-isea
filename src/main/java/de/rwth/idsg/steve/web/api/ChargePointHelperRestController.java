@@ -41,9 +41,3 @@ public class ChargePointHelperRestController {
         return response;
     }
 }
-/*
-public class ConnectorStatusForm {
-    private String chargeBoxId;
-    private String status;
-}
-*/
