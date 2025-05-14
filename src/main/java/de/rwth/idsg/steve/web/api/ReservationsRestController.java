@@ -41,6 +41,24 @@ public class ReservationsRestController {
     // -------------------------------------------------------------------------
 
     // TODO: accepted, cancelled, used
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Reservation Canceled"),
+            @ApiResponse(code = 400, message = "Bad Request", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 422, message = "Unprocessable Entity", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 404, message = "Not Found", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ApiControllerAdvice.ApiErrorResponse.class)}
+    )
+    @PostMapping("/cancel/{reservationId}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    public int cancel(@PathVariable int reservationId) {
+        log.debug("Cancel request: {}", reservationId);
+
+        reservationService.setReservationToCancelled(reservationId);
+
+        return reservationId;
+    }
 
     // -------------------------------------------------------------------------
     // CRUD operations
@@ -135,5 +153,6 @@ public class ReservationsRestController {
         params.setChargeBoxId(chargeBoxId);
 
         return reservationService.getActiveReservationIds(chargeBoxId);
+
     }
 }

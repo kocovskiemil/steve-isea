@@ -45,5 +45,8 @@ public class ReservationService {
         reservationRepository.delete(reservationId);
     }
 
+    public void setReservationToCancelled(int reservationId) {
+        reservationRepository.cancelled(reservationId);
+    }
 
 }
