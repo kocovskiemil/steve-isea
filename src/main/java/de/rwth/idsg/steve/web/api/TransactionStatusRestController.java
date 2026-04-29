@@ -51,6 +51,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/transactions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,25 +62,35 @@ public class TransactionStatusRestController {
     private final TaskStore taskStore;
     private final TransactionRepository transactionRepository;
 
+
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Created"),
             @ApiResponse(code = 400, message = "Bad Request", response = ApiControllerAdvice.ApiErrorResponse.class),
             @ApiResponse(code = 401, message = "Unauthorized", response = ApiControllerAdvice.ApiErrorResponse.class),
             @ApiResponse(code = 422, message = "Unprocessable Entity", response = ApiControllerAdvice.ApiErrorResponse.class),
             @ApiResponse(code = 404, message = "Not Found", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 408, message = "Request Timeout", response = ApiControllerAdvice.ApiErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ApiControllerAdvice.ApiErrorResponse.class)}
     )
     @PostMapping(value = "/start")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public int start(@RequestBody @Valid RemoteStartTransactionParams params) {
-        log.debug("Create request: {}", params);
+    public int startAndWait(@RequestBody @Valid RemoteStartTransactionParams params,
+                           @RequestParam(value = "timeoutSeconds", defaultValue = "30") long timeoutSeconds) {
+        log.debug("Create and wait request: {}, timeoutSeconds: {}", params, timeoutSeconds);
 
-        int response = v16Client.remoteStartTransaction(params);
-
-        log.debug("Create response: {}", response);
-        log.debug("SENT PAYLOAD: {}", params);
-        return response;
+        try {
+            // Call a special method that pre-registers the pending transaction before starting
+            int transactionId = transactionWaitingService.startAndWaitForTransactionId(params, timeoutSeconds);
+            log.debug("Create and wait response (transaction ID): {}", transactionId);
+            return transactionId;
+        } catch (TimeoutException e) {
+            log.warn("Timeout waiting for transaction to start: {}", e.getMessage());
+            throw new RuntimeException("Transaction did not start within " + timeoutSeconds + " seconds", e);
+        } catch (Exception e) {
+            log.error("Error waiting for transaction to start: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to start transaction: " + e.getMessage(), e);
+        }
     }
 
     @ApiResponses(value = {
@@ -100,7 +111,80 @@ public class TransactionStatusRestController {
 
         log.debug("Create response: {}", response);
         log.debug("SENT PAYLOAD: {}", params);
-        return response;
+        return params.getTransactionId();
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 400, message = "Bad Request", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 404, message = "Not Found", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ApiControllerAdvice.ApiErrorResponse.class)}
+    )
+    @GetMapping(value = "/tasks/{taskId}")
+    @ResponseBody
+    public RemoteStartTransactionStatusResponse getStatus(@PathVariable("taskId") int taskId) {
+        RemoteStartTransactionTask task = loadRemoteStartTask(taskId);
+
+        RemoteStartTransactionParams params = task.getParams();
+        List<ChargePointSelect> chargePoints = params.getChargePointSelectList();
+
+        if (chargePoints == null || chargePoints.size() != 1) {
+            throw new BadRequestException(String.format("Task %d does not reference exactly one charge point", taskId));
+        }
+
+        ChargePointSelect chargePoint = chargePoints.get(0);
+        String chargeBoxId = chargePoint.getChargeBoxId();
+        Integer connectorId = params.getConnectorId();
+        String idTag = params.getIdTag();
+
+        RequestResult requestResult = task.getResultMap().get(chargeBoxId);
+
+        TransactionQueryForm query = new TransactionQueryForm();
+        query.setChargeBoxId(chargeBoxId);
+        query.setOcppIdTag(idTag);
+        query.setType(TransactionQueryForm.QueryType.ACTIVE);
+        query.setPeriodType(TransactionQueryForm.QueryPeriodType.ALL);
+
+        List<Transaction> transactions = transactionRepository.getTransactions(query);
+
+        if (connectorId != null) {
+            transactions = transactions.stream()
+                    .filter(tx -> tx.getConnectorId() == connectorId)
+                    .collect(Collectors.toList());
+        }
+
+        List<Integer> transactionIds = transactions.stream()
+                .map(Transaction::getId)
+                .collect(Collectors.toList());
+
+        Integer transactionId = transactionIds.isEmpty() ? null : transactionIds.get(0);
+
+        return RemoteStartTransactionStatusResponse.builder()
+                .taskId(taskId)
+                .chargeBoxId(chargeBoxId)
+                .connectorId(connectorId)
+                .idTag(idTag)
+                .finished(task.isFinished())
+                .response(requestResult != null ? requestResult.getResponse() : null)
+                .errorMessage(requestResult != null ? requestResult.getErrorMessage() : null)
+                .transactionId(transactionId)
+                .activeTransactionIds(transactionIds)
+                .build();
+    }
+
+    private RemoteStartTransactionTask loadRemoteStartTask(int taskId) {
+        CommunicationTask<?, ?> rawTask;
+        try {
+            rawTask = taskStore.get(taskId);
+        } catch (SteveException e) {
+            throw new SteveException.NotFound(e.getMessage());
+        }
+
+        if (!(rawTask instanceof RemoteStartTransactionTask)) {
+            throw new BadRequestException(String.format("Task %d is not a remote start transaction", taskId));
+        }
+        return (RemoteStartTransactionTask) rawTask;
     }
 
     @ApiResponses(value = {
