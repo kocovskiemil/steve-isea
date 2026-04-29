@@ -186,4 +186,77 @@ public class TransactionStatusRestController {
         }
         return (RemoteStartTransactionTask) rawTask;
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 400, message = "Bad Request", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 404, message = "Not Found", response = ApiControllerAdvice.ApiErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ApiControllerAdvice.ApiErrorResponse.class)}
+    )
+    @GetMapping(value = "/tasks/{taskId}")
+    @ResponseBody
+    public RemoteStartTransactionStatusResponse getStatus(@PathVariable("taskId") int taskId) {
+        RemoteStartTransactionTask task = loadRemoteStartTask(taskId);
+
+        RemoteStartTransactionParams params = task.getParams();
+        List<ChargePointSelect> chargePoints = params.getChargePointSelectList();
+
+        if (chargePoints == null || chargePoints.size() != 1) {
+            throw new BadRequestException(String.format("Task %d does not reference exactly one charge point", taskId));
+        }
+
+        ChargePointSelect chargePoint = chargePoints.get(0);
+        String chargeBoxId = chargePoint.getChargeBoxId();
+        Integer connectorId = params.getConnectorId();
+        String idTag = params.getIdTag();
+
+        RequestResult requestResult = task.getResultMap().get(chargeBoxId);
+
+        TransactionQueryForm query = new TransactionQueryForm();
+        query.setChargeBoxId(chargeBoxId);
+        query.setOcppIdTag(idTag);
+        query.setType(TransactionQueryForm.QueryType.ACTIVE);
+        query.setPeriodType(TransactionQueryForm.QueryPeriodType.ALL);
+
+        List<Transaction> transactions = transactionRepository.getTransactions(query);
+
+        if (connectorId != null) {
+            transactions = transactions.stream()
+                    .filter(tx -> tx.getConnectorId() == connectorId)
+                    .collect(Collectors.toList());
+        }
+
+        List<Integer> transactionIds = transactions.stream()
+                .map(Transaction::getId)
+                .collect(Collectors.toList());
+
+        Integer transactionId = transactionIds.isEmpty() ? null : transactionIds.get(0);
+
+        return RemoteStartTransactionStatusResponse.builder()
+                .taskId(taskId)
+                .chargeBoxId(chargeBoxId)
+                .connectorId(connectorId)
+                .idTag(idTag)
+                .finished(task.isFinished())
+                .response(requestResult != null ? requestResult.getResponse() : null)
+                .errorMessage(requestResult != null ? requestResult.getErrorMessage() : null)
+                .transactionId(transactionId)
+                .activeTransactionIds(transactionIds)
+                .build();
+    }
+
+    private RemoteStartTransactionTask loadRemoteStartTask(int taskId) {
+        CommunicationTask<?, ?> rawTask;
+        try {
+            rawTask = taskStore.get(taskId);
+        } catch (SteveException e) {
+            throw new SteveException.NotFound(e.getMessage());
+        }
+
+        if (!(rawTask instanceof RemoteStartTransactionTask)) {
+            throw new BadRequestException(String.format("Task %d is not a remote start transaction", taskId));
+        }
+        return (RemoteStartTransactionTask) rawTask;
+    }
 }
