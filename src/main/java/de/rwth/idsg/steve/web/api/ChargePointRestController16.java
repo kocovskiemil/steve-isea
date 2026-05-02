@@ -5,6 +5,7 @@ import de.rwth.idsg.steve.repository.dto.ChargingProfile;
 import de.rwth.idsg.steve.repository.dto.OcppTag;
 import de.rwth.idsg.steve.service.ChargePointService16_Client;
 import de.rwth.idsg.steve.web.dto.ocpp.ChangeAvailabilityParams;
+import de.rwth.idsg.steve.web.dto.ocpp.ResetParams;
 import de.rwth.idsg.steve.web.api.ApiControllerAdvice;
 
 import io.swagger.annotations.ApiResponse;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-// ...existing code...
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/chargePoint16", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -37,5 +37,21 @@ public class ChargePointRestController16 {
     public int changeAvailability(@RequestBody @Valid ChangeAvailabilityParams params) {
         int response = chargePointService16Client.changeAvailability(params);
         return response;
-    }   
+    }
+
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 400, message = "Bad Request", response = ApiControllerAdvice.ApiErrorResponse.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = ApiControllerAdvice.ApiErrorResponse.class),
+        @ApiResponse(code = 404, message = "Not Found", response = ApiControllerAdvice.ApiErrorResponse.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = ApiControllerAdvice.ApiErrorResponse.class)}
+    )
+    @PostMapping("/reset")
+    @ResponseBody
+    public int reset(@RequestBody @Valid ResetParams params) {
+        log.debug("Reset request: {}", params);
+        int taskId = chargePointService16Client.reset(params);
+        log.debug("Reset response (task ID): {}", taskId);
+        return taskId;
+    }
 }
